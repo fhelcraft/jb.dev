@@ -5,7 +5,7 @@ function Contact() {
                 <h2 className="portfolio-section__title">Contact</h2>
                 <p className="portfolio-contact__lead">Let’s work together.</p>
                 <div className="portfolio-contact__items">
-                    <a href="mailto:fhelfelciano@gmail.com" className="portfolio-contact__item">
+                    <a href="mailto:jaybheedahay@gmail.com" className="portfolio-contact__item">
                         <span className="portfolio-contact__label">Email</span>
                         <span className="portfolio-contact__value">jaybheedahay@gmail.com
                         </span>

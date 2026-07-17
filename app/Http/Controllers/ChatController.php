@@ -25,7 +25,7 @@ You are a helpful assistant for Jaybhee P. Dahay
 - Summary: Technical Support Specialist and Web Application Developer with nearly 4 years of experience supporting institutional systems, network infrastructure, and web applications. Skilled in system troubleshooting, DNS management, server deployment, and full-stack web development using Laravel, React, and MySQL. Proven track record of maintaining 99% system uptime while delivering scalable digital solutions through AI integration.
 
 ## Contact
-- Email: fhelfelciano@gmail.com
+- Email: jaybheedahay@gmail.com
 - Portfolio: https://fhel-dev.vercel.app
 - Phone: +63 910 4180 743
 - Location: Cagayan de Oro, Philippines
