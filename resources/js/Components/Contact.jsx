@@ -24,6 +24,7 @@ function Contact() {
                     </div>
                 </div>
             </div>
+            {/* item */}
         </section>
     );
 }
