@@ -1,32 +1,17 @@
-<?php
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const MODEL = 'llama-3.1-8b-instant';
 
-namespace App\Http\Controllers;
+const PORTFOLIO_CONTEXT = `You are a helpful assistant for Jaybhee P. Dahay's portfolio website. Answer questions based ONLY on the following information. If asked about something not covered here, say you don't have that information and suggest they check the portfolio or contact JB.
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-
-class ChatController extends Controller
-{
-    private const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-    private const MODEL = 'llama-3.1-8b-instant';
-
-    private function getPortfolioContext(): string
-    {
-        return <<<TEXT
-You are a helpful assistant for Jaybhee P. Dahay
-'s portfolio website. Answer questions based ONLY on the following information. If asked about something not covered here, say you don't have that information and suggest they check the portfolio or contact Fhel.
-
-## About Fhel
+## About
 - Name: Jaybhee P. Dahay
-
 - Title: IT Technical Support | Web Application Developer
 - Location: Cagayan de Oro, Philippines
 - Summary: Technical Support Specialist and Web Application Developer with nearly 4 years of experience supporting institutional systems, network infrastructure, and web applications. Skilled in system troubleshooting, DNS management, server deployment, and full-stack web development using Laravel, React, and MySQL. Proven track record of maintaining 99% system uptime while delivering scalable digital solutions through AI integration.
 
 ## Contact
 - Email: fhelfelciano@gmail.com
-- Portfolio: https://fhel-dev.vercel.app
+- Portfolio: https://jb-dev.vercel.app
 - Phone: +63 910 4180 743
 - Location: Cagayan de Oro, Philippines
 
@@ -59,50 +44,65 @@ You are a helpful assistant for Jaybhee P. Dahay
 
 Keep answers concise and friendly. Do not make up information.
 
-Format your replies for readability: put each main point or list item on its own line. Use a blank line between sections (e.g. after an intro sentence, or between skill categories). Use bullet points or short lines rather than long paragraphs. Do not use markdown symbols like ** or ##; use plain text and line breaks only.
-TEXT;
+Format your replies for readability: put each main point or list item on its own line. Use a blank line between sections. Use bullet points or short lines rather than long paragraphs. Do not use markdown symbols like ** or ##; use plain text and line breaks only.`;
+
+export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
     }
 
-    public function chat(Request $request)
-    {
-        $request->validate(['message' => 'required|string|max:2000']);
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed.' });
+    }
 
-        $apiKey = config('services.groq.key');
-        if (empty($apiKey)) {
-            return response()->json(['error' => 'Chat is not configured.'], 503);
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+        return res.status(503).json({ error: 'Chat is not configured.' });
+    }
+
+    const message =
+        typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    if (!message || message.length > 2000) {
+        return res.status(422).json({ error: 'Message is required (max 2000 characters).' });
+    }
+
+    try {
+        const groqRes = await fetch(GROQ_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                messages: [
+                    { role: 'system', content: PORTFOLIO_CONTEXT },
+                    { role: 'user', content: message },
+                ],
+                model: MODEL,
+                temperature: 1,
+                max_completion_tokens: 2048,
+                top_p: 1,
+                stream: false,
+            }),
+        });
+
+        const data = await groqRes.json().catch(() => ({}));
+
+        if (!groqRes.ok) {
+            console.error('Groq API error', groqRes.status, data);
+            return res.status(502).json({
+                error: 'Unable to get a response. Please try again.',
+            });
         }
 
-        $userMessage = trim($request->input('message'));
-        $messages = [
-            ['role' => 'system', 'content' => $this->getPortfolioContext()],
-            ['role' => 'user', 'content' => $userMessage],
-        ];
-
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ])->timeout(60)->post(self::GROQ_URL, [
-                'messages' => $messages,
-                'model' => self::MODEL,
-                'temperature' => 1,
-                'max_completion_tokens' => 2048,
-                'top_p' => 1,
-                'stream' => false,
-            ]);
-
-            if (!$response->successful()) {
-                Log::warning('Groq API error', ['status' => $response->status(), 'body' => $response->body()]);
-                return response()->json(['error' => 'Unable to get a response. Please try again.'], 502);
-            }
-
-            $data = $response->json();
-            $content = $data['choices'][0]['message']['content'] ?? '';
-
-            return response()->json(['content' => trim($content)]);
-        } catch (\Exception $e) {
-            Log::error('Chat error', ['message' => $e->getMessage()]);
-            return response()->json(['error' => 'Something went wrong. Please try again.'], 500);
-        }
+        const content = data?.choices?.[0]?.message?.content ?? '';
+        return res.status(200).json({ content: String(content).trim() });
+    } catch (err) {
+        console.error('Chat error', err);
+        return res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
 }

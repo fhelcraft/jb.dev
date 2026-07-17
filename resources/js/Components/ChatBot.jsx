@@ -34,20 +34,6 @@ function ChatBot() {
         setMessages((prev) => [...prev, { role: "user", content: text }]);
         setLoading(true);
 
-        const noApi = !CHAT_API || CHAT_API === "";
-        if (noApi) {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    role: "assistant",
-                    content:
-                        "Chat isn't available on this deployment. It works when the site is run with the full Laravel backend.",
-                },
-            ]);
-            setLoading(false);
-            return;
-        }
-
         try {
             const { data } = await window.axios.post(CHAT_API, {
                 message: text,
@@ -68,7 +54,7 @@ function ChatBot() {
             const message =
                 typeof raw === "string"
                     ? raw
-                    : "Fhels AI is currently offline due to vercel restriction no backend or API call     -fhel";
+                    : "Chat is temporarily unavailable. Please try again.";
             setMessages((prev) => [
                 ...prev,
                 { role: "assistant", content: message },
@@ -91,7 +77,7 @@ function ChatBot() {
                 className={`portfolio-chat ${open ? "portfolio-chat--open" : ""}`}
             >
                 <div className="portfolio-chat__header">
-                    <span className="portfolio-chat__title">fhel.ai</span>
+                    <span className="portfolio-chat__title">jb.ai</span>
                     <button
                         type="button"
                         className="portfolio-chat__close"
@@ -125,7 +111,7 @@ function ChatBot() {
                     <input
                         type="text"
                         className="portfolio-chat__input"
-                        placeholder="Ask about Fhel..."
+                        placeholder="Ask about JB Dahay..."
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
