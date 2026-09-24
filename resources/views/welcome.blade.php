@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Payment Overdue - </title>
+        <title>Payment Overdue 👻</title>
         <style>
             :root {
                 --bg: #ffffff;

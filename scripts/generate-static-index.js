@@ -18,7 +18,7 @@ const html = `<!DOCTYPE html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Insuficcient Payment</title>
+        <title>Payment Overdue 👻</title>
         <style>
             :root {
                 --bg: #ffffff;
@@ -56,7 +56,7 @@ const html = `<!DOCTYPE html>
         </style>
     </head>
     <body>
-        <h1>Insuficcient Payment</h1>
+        <h1>Payment Overdue 👻</h1>
     </body>
 </html>
 `;
